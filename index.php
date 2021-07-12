@@ -30,28 +30,6 @@
 
     <?php 
 
-        function array_unique_key($array, $key) { 
-            $temp = $key_array = array(); 
-            $i = 0; 
-            foreach($array as $val) { 
-                if (!in_array($val[$key], $key_array)) { 
-                    $key_array[$i] = $val[$key]; 
-                    $temp[$i] = $val; 
-                } 
-                $i++; 
-            } 
-            return $temp; 
-        }        
-
-        function preparation_data ($array) {
-            $new_array = [];
-            foreach ($array as $value){
-                $new_array[$value['id']] = $value;
-            }
-            
-            return $new_array;
-        }
-
         $users = [
             [
                 'id' => '1',
@@ -167,41 +145,50 @@
             
         ];
 
+        function preparation_data ($array) {
+            $new_array = [];
+            foreach ($array as $value){
+                $new_array[$value['id']] = $value;
+            }
+            
+            return $new_array;
+        }
+
         $processed_users = preparation_data($users);
         $processed_positions = preparation_data($positions);
-
-        
-        
-
-    
-        $result = [];
+        $slrs_column_date = array_column($salaries, 'date', 'id');
+        $slrs_column_user_id = array_column($salaries, 'user_id', 'id');        
+        array_multisort($slrs_column_user_id, SORT_ASC | SORT_NUMERIC, $slrs_column_date, SORT_DESC | SORT_STRING, $salaries);
+              
+        $result = $existing_users = [];
         foreach ($salaries as $key => $salary){    
             if (!isset($salary['salary'])  || 
             $salary['salary'] == '0' || 
-            !isset($salary['position_id'])){  
-                continue;
-            }
+            !isset($salary['position_id']))continue;
 
-            array_push($result, $salary);
+            
 
-            if (isset($processed_users[$salary['user_id']])){
+            if (!in_array($salary['user_id'], $existing_users)) { 
                 
-                $result[$key]['user_id'] = $processed_users[$salary['user_id']]['name'];
+                $existing_users[$key] = $salary['user_id']; 
+                $result[$key] = $salary; 
 
-            }
-            if (isset($processed_positions[$salary['position_id']])){
-                
-                $result[$key]['position_id'] = $processed_positions[$salary['position_id']]['name'];
+                if (isset($processed_users[$salary['user_id']])){
 
-            }
-            
-            
-            
+                    $result[$key]['user_id'] = $processed_users[$salary['user_id']]['name'];
+    
+                }
+                if (isset($processed_positions[$salary['position_id']])){
+                    
+                    $result[$key]['position_id'] = $processed_positions[$salary['position_id']]['name'];
+    
+                }
+
+            } else continue;
+
         }
-        $slrs_column = array_column($result, 'date');
-        array_multisort($slrs_column, SORT_DESC , $result);
-        $result = array_unique_key($result, 'user_id');
-        $slrs_column = array_column($result, 'salary');
+ 
+        $slrs_column = array_column($result, 'salary', 'id');
         array_multisort($slrs_column, SORT_DESC | SORT_NUMERIC , $result);
 
         foreach ($result as $row) {
