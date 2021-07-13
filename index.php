@@ -141,6 +141,22 @@
                 'salary' => '0'
                 
             ],
+            [
+                'id' => '9',
+                'date' => '2001-03-01',
+                'user_id' => '2',
+                'position_id' => '3',
+                'salary' => '9000'
+                
+            ],
+            [
+                'id' => '10',
+                'date' => '2001-04-01',
+                'user_id' => '2',
+                'position_id' => '4',
+                'salary' => '9000'
+                
+            ],
             
             
         ];
@@ -156,47 +172,69 @@
 
         $processed_users = preparation_data($users);
         $processed_positions = preparation_data($positions);
-        $slrs_column_date = array_column($salaries, 'date', 'id');
-        $slrs_column_user_id = array_column($salaries, 'user_id', 'id');        
-        array_multisort($slrs_column_user_id, SORT_ASC | SORT_NUMERIC, $slrs_column_date, SORT_DESC | SORT_STRING, $salaries);
+        // $slrs_column_date = array_column($salaries, 'date', 'id');
+        // $slrs_column_user_id = array_column($salaries, 'user_id', 'id');        
+        // array_multisort($slrs_column_user_id, SORT_ASC | SORT_NUMERIC, $slrs_column_date, SORT_DESC | SORT_STRING, $salaries);
               
-        $result = $existing_users = [];
+        $result = $last_users = [];
         foreach ($salaries as $key => $salary){    
             if (!isset($salary['salary'])  || 
             $salary['salary'] == '0' || 
-            !isset($salary['position_id']))continue;
+            !isset($salary['position_id'])) continue;
 
             
 
-            if (!in_array($salary['user_id'], $existing_users)) { 
+            if (!in_array($salary['user_id'], array_column($last_users, 'user_id'))) { 
                 
-                $existing_users[$key] = $salary['user_id']; 
-                $result[$key] = $salary; 
+                $last_users[$key] = $salary; 
+                $result[$key] = $salary;
 
-                if (isset($processed_users[$salary['user_id']])){
+            } else {
+                $last_user = array_search($salary['user_id'], array_column($last_users, 'user_id'));
 
-                    $result[$key]['user_id'] = $processed_users[$salary['user_id']]['name'];
-    
+
+                if (strtotime($salary['date']) > strtotime($last_users[$last_user]['date'])){
+                    echo $last_users[$last_user];
+                    unset($result[$last_user], $last_users[$last_user]);
+                    $result[$last_user] = $salary;
+                    echo '123';
+
                 }
-                if (isset($processed_positions[$salary['position_id']])){
-                    
-                    $result[$key]['position_id'] = $processed_positions[$salary['position_id']]['name'];
-    
-                }
-
-            } else continue;
+            }
 
         }
  
-        $slrs_column = array_column($result, 'salary', 'id');
-        array_multisort($slrs_column, SORT_DESC | SORT_NUMERIC , $result);
+        // $slrs_column = array_column($result, 'salary', 'id');
+        // array_multisort($slrs_column, SORT_DESC | SORT_NUMERIC , $result);
+
+        foreach ($result as $key => $salary){
+
+            
+            if (!is_array($salary['user_id'])){
+                if (isset($processed_users[$salary['user_id']])){
+
+                    $result[$key]['user_id'] = array("id" => $result[$key]['user_id'], 
+                    "name" => $processed_users[$salary['user_id']]['name']);
+
+                }
+                if (isset($processed_positions[$salary['position_id']])){
+                    
+                    $result[$key]['position_id'] = array( "id" => $result[$key]['position_id'], 
+                    "name" => $processed_positions[$salary['position_id']]['name']);
+                    
+
+                }
+            }   
+        }
+        
+
 
         foreach ($result as $row) {
             echo "<tr>";
             echo "<td>" . $row["id"] . "</td>";
             echo "<td>" . $row["date"] . "</td>";
-            echo "<td>" . $row["user_id"] . "</td>";
-            echo "<td>" . $row['position_id'] . "</td>";
+            echo "<td>" . (is_array($row['user_id']) ? $row['user_id']['name'] : $row['user_id']) . "</td>";
+            echo "<td>" . (is_array($row['position_id']) ? $row['position_id']['name'] : $row['position_id']) . "</td>";
             echo "<td>" . $row['salary'] . "</td>";
             echo "</tr>";
         }
