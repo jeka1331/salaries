@@ -1,0 +1,33 @@
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50)
+);
+
+CREATE TABLE positions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50)
+);
+
+CREATE TABLE salaries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  date DATE,
+  user_id INT,
+  position_id INT,
+  salary INT default 0
+);
+
+INSERT INTO users (name) 
+VALUES ("Andrey"), ("Boris"), 
+       ("Anna"), ("Anton"), 
+       ("Maksim"), ("Lena");
+       
+INSERT INTO positions (name) 
+VALUES ("Stazher"), ("Tech"), 
+       ("Special"), ("Program");
+
+INSERT INTO salaries (date, user_id, position_id, salary) 
+VALUES ("2001-01-01", 1, 4, 9500), ("2001-01-01", 2, 1, 500),
+       ("2001-01-01", 3, 3, 4500), ("2001-01-01", 4, 3, 4000),
+       ("2001-02-01", 5, 4, 7500), ("2001-02-01", 2, 2, 2000),
+       ("2001-02-01", 6, NULL, 5000), ("2001-02-01", 6, 3, 0);
+

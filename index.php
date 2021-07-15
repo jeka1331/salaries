@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Salaries
+    </title>
 </head>
 <body>
 <h2>Зарплаты</h2>
@@ -33,7 +34,7 @@
 
     <?php 
 
-        $users = [
+        /*$users = [
             [
                 'id' => '1',
                 'name' => 'Andrey'
@@ -60,24 +61,6 @@
             ]
         ];
 
-        $positions = [
-            [
-                'id' => '1',
-                'name' => 'Stazher'
-            ],
-            [
-                'id' => '2',
-                'name' => 'Tech'
-            ],
-            [
-                'id' => '3',
-                'name' => 'Special'
-            ],
-            [
-                'id' => '4',
-                'name' => 'Program'
-            ]
-        ];
 
         $salaries = [
             [
@@ -162,7 +145,26 @@
             ],
             
             
-        ];
+        ]; */
+
+        $mysqli = new mysqli('localhost', 'root', '', database: 'salaries');
+
+        $result = $mysqli->query("SELECT * FROM salaries");
+
+        if (!(mysqli_affected_rows($mysqli) > 500)) {
+
+           
+            
+        }
+
+        $salaries = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        
+        $result = $mysqli->query("SELECT * FROM positions");
+        $positions = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        $result = $mysqli->query("SELECT * FROM users");
+        $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
 
         function preparation_data ($array) {
             $new_array = [];
@@ -207,7 +209,6 @@
             }
         }
         
-        // var_dump($last_salaries_by_user);
         usort($last_salaries_by_user, salary_sort('salary'));
 
         foreach ($last_salaries_by_user as $row) {
