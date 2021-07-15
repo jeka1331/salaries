@@ -17,6 +17,9 @@
         date
         </th>
         <th>
+        user_id
+        </th>
+        <th>
         user_name
         </th>
         <th>
@@ -141,22 +144,22 @@
                 'salary' => '0'
                 
             ],
-            // [
-            //     'id' => '9',
-            //     'date' => '2001-03-01',
-            //     'user_id' => '2',
-            //     'position_id' => '3',
-            //     'salary' => '9000'
+            [
+                'id' => '9',
+                'date' => '2001-03-01',
+                'user_id' => '  2',
+                'position_id' => '3',
+                'salary' => '9000'
                 
-            // ],
-            // [
-            //     'id' => '10',
-            //     'date' => '2001-04-01',
-            //     'user_id' => '2',
-            //     'position_id' => '4',
-            //     'salary' => '18000'
+            ],
+            [
+                'id' => '10',
+                'date' => '2001-04-01',
+                'user_id' => ' 2',
+                'position_id' => '4',
+                'salary' => '18000'
                 
-            // ],
+            ],
             
             
         ];
@@ -164,7 +167,7 @@
         function preparation_data ($array) {
             $new_array = [];
             foreach ($array as $value){
-                $new_array[$value['id']] = $value;
+                $new_array[intval($value['id'])] = $value;
             }
             
             return $new_array;
@@ -172,69 +175,48 @@
 
         function salary_sort($key){
             return function ($a, $b) use ($key) {
-                if (intval($a[$key]) == intval($b[$key])) {
+                if ($a[$key] == $b[$key]) {
                     return 0;
                 }
-                return (intval($a[$key]) > intval($b[$key])) ? -1 : 1;
+                return ($a[$key] > $b[$key]) ? -1 : 1;
             }; 
         }
 
         $processed_users = preparation_data($users);
-        $processed_positions = preparation_data($positions);
-                      
-        $last_salaries_by_user = [];
-
+        $processed_positions = preparation_data($positions);              
 
         // Главный боос-цикл foreach (Существует чтобы брать последнюю зарплату и добавлять имена и должности вместо id )
+        $last_salaries_by_user = [];
         foreach ($salaries as $salary){
             
-            if (!isset($salary['salary'])  || 
-            $salary['salary'] == '0' || 
-            !isset($salary['position_id'])) {continue; }
+            if (!isset($salary['salary']) or $salary['salary'] == '0' or !isset($salary['position_id'])) continue;
+            
+            $salary['user_id'] = intval($salary['user_id']);
 
-            if (!array_key_exists(intval($salary['user_id']), $last_salaries_by_user)) { 
+            $salary['user_name'] = (isset($processed_users[$salary['user_id']])?$processed_users[$salary['user_id']]['name']:null);
+            $salary['position_name'] = (isset($processed_positions[$salary['position_id']])?$processed_positions[$salary['position_id']]['name']:null);
 
-                $last_salaries_by_user[$salary['user_id']] = $salary;
-
-                if (isset($processed_users[$salary['user_id']])){
-                    $last_salaries_by_user[$salary['user_id']]['user_name'] = $processed_users[$salary['user_id']]['name'];
-                }
-                if (isset($processed_positions[$salary['position_id']])){
-                    $last_salaries_by_user[$salary['user_id']]['position_name'] = $processed_positions[$salary['position_id']]['name'];
-                }          
-
+            $element =& $last_salaries_by_user[$salary['user_id']];
+            if (!isset($element)) { 
+                $element = $salary;         
             } else {
                 
-                if (strtotime($salary['date']) > strtotime($last_salaries_by_user[$salary['user_id']]['date'])){
-
-                    $last_salaries_by_user[$salary['user_id']] = $salary;
-
-                    if (isset($processed_users[$salary['user_id']])){
-                        $last_salaries_by_user[$salary['user_id']]['user_name'] = $processed_users[$salary['user_id']]['name'];
-                    }
-                    if (isset($processed_positions[$salary['position_id']])){
-                        $last_salaries_by_user[$salary['user_id']]['position_name'] = $processed_positions[$salary['position_id']]['name'];
-                    }
-
-                } else continue;
-
-                
+                if (strtotime($salary['date']) > strtotime($element['date'])){
+                    $element = $salary;
+                }
             }
         }
         
-
+        // var_dump($last_salaries_by_user);
         usort($last_salaries_by_user, salary_sort('salary'));
-
-        
-        
-
 
         foreach ($last_salaries_by_user as $row) {
             echo "<tr>";
             echo "<td>" . $row["id"] . "</td>";
             echo "<td>" . $row["date"] . "</td>";
-            echo "<td>" . $row['user_name'] . "</td>";
-            echo "<td>" . $row['position_name'] . "</td>";
+            echo "<td>" . $row['user_id'] . "</td>";
+            echo "<td>" . ( isset($row['user_name']) ? $row['user_name'] : $row['user_id'] ) . "</td>";
+            echo "<td>" . ( isset($row['position_name']) ? $row['position_name'] : $row['position_id'] ) . "</td>";
             echo "<td>" . $row['salary'] . "</td>";
             echo "</tr>";
         }
