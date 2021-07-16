@@ -147,23 +147,65 @@
             
         ]; */
 
-        $mysqli = new mysqli('localhost', 'root', '', database: 'salaries');
+        $mysqli = new mysqli('localhost', 'root', '', 'salaries');
 
         $result = $mysqli->query("SELECT * FROM salaries");
+        
+        
 
-        if (!(mysqli_affected_rows($mysqli) > 500)) {
+        if (!(mysqli_affected_rows($mysqli) > 1000000)) {
 
-           
+            $i = 0;
+            while ($i <= 1000000) {
+                
+                $date_to_add = mt_rand(strtotime("1 January 2001") , strtotime("1 January 2020"));
+                //var_dump($date_to_add);
+
+                $user_id_to_add = rand(1, 500);
+                $position_id_to_add = rand(1, 4);
+
+                $salary_to_add = mt_rand(500, 50000);
+
+                $mysqli->query("INSERT INTO salaries (date, user_id, position_id, salary) VALUES (FROM_UNIXTIME($date_to_add), $user_id_to_add, $position_id_to_add, $salary_to_add)");    
+
+                $i++;
+
+            }
             
-        }
-
-        $salaries = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            $result = $mysqli->query("SELECT * FROM salaries");
+            $salaries = mysqli_fetch_all($result, MYSQLI_ASSOC);   
+            
+        } else $salaries = mysqli_fetch_all($result, MYSQLI_ASSOC);
         
         $result = $mysqli->query("SELECT * FROM positions");
         $positions = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
         $result = $mysqli->query("SELECT * FROM users");
-        $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        if (!(mysqli_affected_rows($mysqli) > 500)) {
+            
+
+
+            for ($i = 0; $i <= 500; $i++){
+                
+            }
+
+
+            // while ($i <= 500) {
+            //     $name_to_add = substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil(10/strlen($x)) )),1,10);
+            //     //var_dump($name_to_add);
+            //     $mysqli->query("INSERT INTO `users`(`name`) VALUES ('$name_to_add')");    
+
+            //     $i++;
+
+                
+            // }
+            $result = $mysqli->query("SELECT * FROM users");
+            $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        }else $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        
 
 
         function preparation_data ($array) {
