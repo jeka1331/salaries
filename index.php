@@ -34,7 +34,7 @@
 
     <?php 
 
-        /*$users = [
+        $users = [
             [
                 'id' => '1',
                 'name' => 'Andrey'
@@ -62,7 +62,7 @@
         ];
 
 
-        $salaries = [
+        /*$salaries = [
             [
                 'id' => '1',
                 'date' => '2001-01-01',
@@ -156,7 +156,8 @@
         if (!(mysqli_affected_rows($mysqli) > 1000000)) {
 
             $i = 0;
-            while ($i <= 1000000) {
+            $sql = "INSERT INTO salaries (date, user_id, position_id, salary) VALUES ";
+            while ($i <= 20000) {
                 
                 $date_to_add = mt_rand(strtotime("1 January 2001") , strtotime("1 January 2020"));
                 //var_dump($date_to_add);
@@ -166,11 +167,14 @@
 
                 $salary_to_add = mt_rand(500, 50000);
 
-                $mysqli->query("INSERT INTO salaries (date, user_id, position_id, salary) VALUES (FROM_UNIXTIME($date_to_add), $user_id_to_add, $position_id_to_add, $salary_to_add)");    
+                $sql .= "(FROM_UNIXTIME($date_to_add), $user_id_to_add, $position_id_to_add, $salary_to_add), ";
+
 
                 $i++;
 
             }
+            $sql = mb_substr($sql, 0, -2);
+            $mysqli->query($sql);
             
             $result = $mysqli->query("SELECT * FROM salaries");
             $salaries = mysqli_fetch_all($result, MYSQLI_ASSOC);   
@@ -185,10 +189,25 @@
         if (!(mysqli_affected_rows($mysqli) > 500)) {
             
 
+            $names_to_db_filepath = './/uploads//russian_names.json';
+            if (file_exists($names_to_db_filepath)){
+                $uploaded_names = file_get_contents($names_to_db_filepath);
 
-            for ($i = 0; $i <= 500; $i++){
-                
-            }
+                $uploaded_names = json_decode($uploaded_names, TRUE);
+                if ($uploaded_names === null):
+                    echo 'Какие-то проблемы с импортом || '.'Последняя ошибка: ', json_last_error_msg(), PHP_EOL, PHP_EOL;;
+                else:
+                    $sql = 'INSERT INTO `users` (`name`) VALUES ';
+                    foreach ($uploaded_names as $value):
+                        $sql .= "('" . $value['Name'] . "'), ";
+                    endforeach;
+                    $sql = mb_substr($sql, 0, -2);
+                    var_dump($sql);
+                    $mysqli->query($sql);
+                    
+
+                endif;    
+            } else echo 'Файла с именами для импорта не сущетвует в папке uploads';
 
 
             // while ($i <= 500) {
