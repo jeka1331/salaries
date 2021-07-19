@@ -33,8 +33,8 @@
     </tr>
 
     <?php 
-
-        $users = [
+        $start = microtime(true);
+        /*$users = [
             [
                 'id' => '1',
                 'name' => 'Andrey'
@@ -62,7 +62,7 @@
         ];
 
 
-        /*$salaries = [
+        $salaries = [
             [
                 'id' => '1',
                 'date' => '2001-01-01',
@@ -150,9 +150,6 @@
         $mysqli = new mysqli('localhost', 'root', '', 'salaries');
 
         $result = $mysqli->query("SELECT * FROM salaries");
-        
-        
-
         if (!(mysqli_affected_rows($mysqli) > 1000000)) {
 
             $i = 0;
@@ -271,7 +268,7 @@
         }
         
         usort($last_salaries_by_user, salary_sort('salary'));
-
+        echo 'Время работы скрипта = ' . (microtime(true) - $start) . ' сек.'; 
         foreach ($last_salaries_by_user as $row) {
             echo "<tr>";
             echo "<td>" . $row["id"] . "</td>";
@@ -282,6 +279,8 @@
             echo "<td>" . $row['salary'] . "</td>";
             echo "</tr>";
         }
+        echo 'Время работы скрипта с выводом данных = ' . (microtime(true) - $start) . ' сек.'; 
+
     ?>
 
 </table>
